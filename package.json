@@ -1,0 +1,33 @@
+{
+  "name": "tcb-opus",
+  "version": "1.0.0",
+  "description": "A discord bot to get the latest manga chapters as soon as they comes out.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Coko7/tcb-opus.git"
+  },
+  "keywords": [
+    "TCBScans",
+    "Manga",
+    "Discord",
+    "Bot",
+    "One Piece",
+    "Chapter",
+    "Web Scraping"
+  ],
+  "author": "Coko7",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Coko7/tcb-opus/issues"
+  },
+  "homepage": "https://github.com/Coko7/tcb-opus#readme",
+  "dependencies": {
+    "axios": "^0.25.0",
+    "discord.js": "^13.6.0"
+  }
+}
