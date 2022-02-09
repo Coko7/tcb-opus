@@ -1,7 +1,7 @@
 {
   "name": "tcb-opus",
-  "version": "1.0.0",
-  "description": "A discord bot to get the latest manga chapters as soon as they comes out.",
+  "version": "1.0.1",
+  "description": "A discord bot to get the latest manga chapters from TCBScans as soon as they come out.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

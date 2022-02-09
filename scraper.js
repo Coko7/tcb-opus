@@ -32,7 +32,7 @@ async function fetchLatestChapter(manga, website) {
       if (chapNumStart === -1) {
         return {
           // Remove excess slashes from the URL
-          url: (website + url).replace(/\/+/g, "/"),
+          url: (website + url).replace(/([^:]\/)\/+/g, "$1"),
         };
       }
 
@@ -45,7 +45,8 @@ async function fetchLatestChapter(manga, website) {
 
       return {
         chapter: chapNum,
-        url: website + url,
+        // Remove excess slashes from the URL
+        url: (website + url).replace(/([^:]\/)\/+/g, "$1"),
       };
     }
   }
