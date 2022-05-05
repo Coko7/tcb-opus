@@ -1,13 +1,16 @@
 // Import Node dependencies
-const axios = require("axios");
 const { Client, Intents } = require("discord.js");
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
 
+let waitForYAGPDBQueue = [];
+
 // Import local dependencies
 const utils = require("./utils");
 const scraper = require("./scraper");
+
+const casiogrub = require("./casiogrub");
 
 // Load config and data files
 const config = require("./config.json");
@@ -24,61 +27,110 @@ client.on("messageCreate", (message) => {
   // If the message is sent by this bot, ignore it
   if (message.author.id === client.user.id) return;
 
-  // If the message was not sent in input channel, ignore it
-  if (message.channel.id !== config.opus.discord.fromChannel) return;
+  if (message.channel.id === config.opus.discord.fromChannel) {
+    processTCBMessage(message);
+  }
 
-  // Check whether the message contains one of the desired mangas
-  const manga = mangas.find((m) =>
+  if (message.author.id === "204255221017214977") {
+    console.log(waitForYAGPDBQueue);
+    let req = waitForYAGPDBQueue.pop();
+
+    if (req) {
+      if (message.content.indexOf("is not a whole number") >= 0) {
+        if (!req.fail) {
+          setTimeout(() => {
+            message.channel.send(
+              `${message.author} Just do the maths bro :smiley:, thats __**${req.result}**__`
+            );
+          }, 1000);
+        }
+      }
+    }
+  }
+
+  if (
+    message.content.startsWith("-takerep") ||
+    message.content.startsWith("-giverep")
+  ) {
+    const equation = message.content.substring(
+      message.content.indexOf(">") + 1
+    );
+    console.log(equation);
+    try {
+      const res = casiogrub.evalInput(equation);
+      console.log(res);
+      waitForYAGPDBQueue.push({
+        user: message.author.id,
+        result: res,
+        fail: false,
+      });
+    } catch (err) {
+      waitForYAGPDBQueue.push({ user: message.author.id, fail: true });
+      console.log(err);
+    }
+  }
+});
+
+function processTCBMessage(message) {
+  const mangaMentioned = mangas.find((m) =>
     message.content.toLowerCase().includes(m.toLowerCase())
   );
 
-  if (manga) {
+  if (mangaMentioned) {
     // Fetch the latest chapter from TCBScans website
-    scraper.fetchLatestChapter(manga, config.opus.scanSite).then((res) => {
-      if (res.error) {
-        console.error(`Error occured while fetching ${manga}: ${res.error}`);
-      } else {
-        if (res.chapter) {
-          // Send a message with the chapter link in the output channel
-          client.channels.cache
-            .get(config.opus.discord.toChannel)
-            .send(
-              `<@&${config.opus.discord.notifyRole}> ${manga} chapter **${res.chapter}** is out!\n${res.url}`
+    scraper
+      .fetchLatestChapter(mangaMentioned, config.opus.scanSite)
+      .then((res) => {
+        if (res.error) {
+          console.error(
+            `Error occured while fetching ${mangaMentioned}: ${res.error}`
+          );
+        } else {
+          if (res.chapter) {
+            // Send a message with the chapter link in the output channel
+            client.channels.cache
+              .get(config.opus.discord.toChannel)
+              .send(
+                `<@&${config.opus.discord.notifyRole}> ${mangaMentioned} chapter **${res.chapter}** is out!\n${res.url}`
+              );
+
+            console.log(
+              `Successfully fetched ${mangaMentioned} chapter ${res.chapter}`
             );
 
-          console.log(`Successfully fetched ${manga} chapter ${res.chapter}`);
+            // Update data file with latest chapter number
+            if (!data.mangas) data.mangas = [];
+            const stored = data.mangas.find((m) => m.name === mangaMentioned);
 
-          // Update data file with latest chapter number
-          if (!data.mangas) data.mangas = [];
-          const stored = data.mangas.find((m) => m.name === manga);
+            if (stored) {
+              // If the stored chapter is not the latest
+              if (stored.chapter < res.chapter) {
+                const missed = res.chapter - stored.chapter - 1;
+                if (missed > 0) {
+                  console.log(
+                    `I missed ${missed} ${mangaMentioned} chapter${
+                      missed > 1 ? "s" : ""
+                    }!`
+                  );
+                }
 
-          if (stored) {
-            // If the stored chapter is not the latest
-            if (stored.chapter < res.chapter) {
-              const missed = res.chapter - stored.chapter - 1;
-              if (missed > 0) {
-                console.log(
-                  `I missed ${missed} ${manga} chapter${missed > 1 ? "s" : ""}!`
-                );
+                stored.chapter = res.chapter;
+                stored.url = res.url;
+                utils.writeJSONToFile(data, "./data.json");
               }
-
-              stored.chapter = res.chapter;
-              stored.url = res.url;
+            } else {
+              data.mangas.push({
+                name: mangaMentioned,
+                chapter: res.chapter,
+                url: res.url,
+              });
               utils.writeJSONToFile(data, "./data.json");
             }
-          } else {
-            data.mangas.push({
-              name: manga,
-              chapter: res.chapter,
-              url: res.url,
-            });
-            utils.writeJSONToFile(data, "./data.json");
           }
         }
-      }
-    });
+      });
   }
-});
+}
 
 // Login to Discord with the app token
 client.login(config.token);
