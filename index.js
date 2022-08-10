@@ -39,14 +39,37 @@ client.on("messageCreate", async (message) => {
       console.error(`Error occured while fetching ${manga}: ${res.error}`);
       return;
     } else if (res.chapter) {
+      // Find the output channel based on the channel Id in config
+      const channel = client.channels.cache.get(config.opus.discord.toChannel);
+
       // Send a message with the chapter link in the output channel
-      client.channels.cache
-        .get(config.opus.discord.toChannel)
-        .send(
-          `<@&${config.opus.discord.notifyRole}> ${manga} chapter **${res.chapter}** is out!\n${res.url}`
-        );
+      await channel.send(
+        `<@&${config.opus.discord.notifyRole}> ${manga} chapter **${res.chapter}** is out!\n${res.url}`
+      );
 
       console.log(`Successfully fetched ${manga} chapter ${res.chapter}`);
+
+      // Automatically create a thread to talk about the chapter if configured
+      if (config.opus.discord.autoCreateThread) {
+        const threadName = `chap-${res.chapter}-talk`;
+
+        // Create thread if not exist
+        let thread = channel.threads.cache.find((t) => t.name === threadName);
+
+        if (!thread) {
+          thread = await channel.threads.create({
+            name: threadName,
+            autoArchiveDuration: 60 * 24 * 7,
+            reason: "Lets talk about this chapter",
+          });
+
+          console.log(`Created thread: ${thread.name}`);
+        }
+
+        await channel.send(
+          `Please go to the designated thread <#${thread.id}> to talk about the chapter without spoiling anyone :slight_smile:`
+        );
+      }
 
       // Update data file with latest chapter number
       if (!data.mangas) data.mangas = [];
