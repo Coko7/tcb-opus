@@ -47,6 +47,7 @@ Here is the list of keys you can set:
 - opus:
   - mangas: The names of the mangas you are interested in
   - discord:
+    - autoCreateThread: Whether a new thread should be created for the released chapter. The thread will be attached to channel **toChannel**
     - notifyRole: The ID of the role to notify once the chapter comes out
     - fromChannel: The ID of the discord channel subscribed to the TCB server #releases channel
     - toChannel:The ID of the discord channel where you want the final message to appear
