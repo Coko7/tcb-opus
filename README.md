@@ -32,6 +32,7 @@ Before running the bot for the first time, you need to modify its configuration 
     "scanSite": "https://onepiecechapters.com/",
     "mangas": ["One Piece"],
     "discord": {
+      "autoCreateThread": true,
       "notifyRole": "YOUR_ROLE_ID",
       "fromChannel": "YOUR_FROM_CHANNEL",
       "toChannel": "YOUR_TO_CHANNEL"
