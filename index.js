@@ -1,5 +1,4 @@
 // Import Node dependencies
-const axios = require("axios");
 const { Client, Intents } = require("discord.js");
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -20,7 +19,7 @@ client.once("ready", () => {
   console.log("tcb-opus module is ready!");
 });
 
-client.on("messageCreate", (message) => {
+client.on("messageCreate", async (message) => {
   // If the message is sent by this bot, ignore it
   if (message.author.id === client.user.id) return;
 
@@ -34,49 +33,48 @@ client.on("messageCreate", (message) => {
 
   if (manga) {
     // Fetch the latest chapter from TCBScans website
-    scraper.fetchLatestChapter(manga, config.opus.scanSite).then((res) => {
-      if (res.error) {
-        console.error(`Error occured while fetching ${manga}: ${res.error}`);
-      } else {
-        if (res.chapter) {
-          // Send a message with the chapter link in the output channel
-          client.channels.cache
-            .get(config.opus.discord.toChannel)
-            .send(
-              `<@&${config.opus.discord.notifyRole}> ${manga} chapter **${res.chapter}** is out!\n${res.url}`
+    const res = await scraper.fetchLatestChapter(manga, config.opus.scanSite);
+
+    if (res.error) {
+      console.error(`Error occured while fetching ${manga}: ${res.error}`);
+      return;
+    } else if (res.chapter) {
+      // Send a message with the chapter link in the output channel
+      client.channels.cache
+        .get(config.opus.discord.toChannel)
+        .send(
+          `<@&${config.opus.discord.notifyRole}> ${manga} chapter **${res.chapter}** is out!\n${res.url}`
+        );
+
+      console.log(`Successfully fetched ${manga} chapter ${res.chapter}`);
+
+      // Update data file with latest chapter number
+      if (!data.mangas) data.mangas = [];
+      const stored = data.mangas.find((m) => m.name === manga);
+
+      if (stored) {
+        // If the stored chapter is not the latest
+        if (stored.chapter < res.chapter) {
+          const missed = res.chapter - stored.chapter - 1;
+          if (missed > 0) {
+            console.log(
+              `I missed ${missed} ${manga} chapter${missed > 1 ? "s" : ""}!`
             );
-
-          console.log(`Successfully fetched ${manga} chapter ${res.chapter}`);
-
-          // Update data file with latest chapter number
-          if (!data.mangas) data.mangas = [];
-          const stored = data.mangas.find((m) => m.name === manga);
-
-          if (stored) {
-            // If the stored chapter is not the latest
-            if (stored.chapter < res.chapter) {
-              const missed = res.chapter - stored.chapter - 1;
-              if (missed > 0) {
-                console.log(
-                  `I missed ${missed} ${manga} chapter${missed > 1 ? "s" : ""}!`
-                );
-              }
-
-              stored.chapter = res.chapter;
-              stored.url = res.url;
-              utils.writeJSONToFile(data, "./data.json");
-            }
-          } else {
-            data.mangas.push({
-              name: manga,
-              chapter: res.chapter,
-              url: res.url,
-            });
-            utils.writeJSONToFile(data, "./data.json");
           }
+
+          stored.chapter = res.chapter;
+          stored.url = res.url;
+          utils.writeJSONToFile(data, "./data.json");
         }
+      } else {
+        data.mangas.push({
+          name: manga,
+          chapter: res.chapter,
+          url: res.url,
+        });
+        utils.writeJSONToFile(data, "./data.json");
       }
-    });
+    }
   }
 });
 

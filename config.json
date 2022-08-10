@@ -1,13 +1,14 @@
 {
-  "token": "YOUR_BOT_TOKEN",
+  "token": "NTUzODg0NTcyMDI3MzIyMzc4.GnD-Zg.EtnopMHr0XrcZ4m-stKiYL0ja9tSqmG0kiCfW0",
   "prefix": "!",
   "opus": {
     "scanSite": "https://onepiecechapters.com/",
     "mangas": ["One Piece"],
     "discord": {
-      "notifyRole": "YOUR_ROLE_ID",
-      "fromChannel": "YOUR_FROM_CHANNEL",
-      "toChannel": "YOUR_TO_CHANNEL"
+      "autoCreateThread": true,
+      "notifyRole": "1006812210212896879",
+      "fromChannel": "931490443517108254",
+      "toChannel": "1006812418820812942"
     }
   }
 }
