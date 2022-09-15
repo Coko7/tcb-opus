@@ -137,7 +137,7 @@ function formatTCBMessage(msg, manga) {
 /**
  * Fetch important elements from the TCB message and create a new message.
  *
- * @since       1.0.0
+ * @since       1.2.0
  * @access      private
  *
  * @param {string} channelId The ID of the discord channel where TCB updates are sent
