@@ -10,10 +10,14 @@ const scraper = require("./scraper");
 
 // Load config and data files
 const config = require("./config.json");
+const opus = require("./opus-config.json");
 const data = require("./data.json");
 
 // Load the manga interests and fix their case to be title case
-const mangas = config.opus.mangas.map((m) => utils.toTitleCase(m));
+const mangas = opus.mangas.map((m) => {
+  m.name = utils.toTitleCase(m.name);
+  return m;
+});
 
 client.once("ready", () => {
   console.log("tcb-opus module is ready!");
@@ -24,33 +28,34 @@ client.on("messageCreate", async (message) => {
   if (message.author.id === client.user.id) return;
 
   // If the message was not sent in input channel, ignore it
-  if (message.channel.id !== config.opus.discord.fromChannel) return;
+  if (!isListenChannel(message.channel.id)) return;
 
   // Check whether the message contains one of the desired mangas
   const manga = mangas.find((m) =>
-    message.content.toLowerCase().includes(m.toLowerCase())
+    message.content.toLowerCase().includes(m.name.toLowerCase())
   );
 
-  if (manga) {
+  if (manga && manga.active) {
     // Fetch the latest chapter from TCBScans website
-    const res = await scraper.fetchLatestChapter(manga, config.opus.scanSite);
+    const res = await scraper.fetchLatestChapter(manga.name, opus.scanSite);
 
     if (res.error) {
-      console.error(`Error occured while fetching ${manga}: ${res.error}`);
+      console.error(`Error occured while fetching ${manga.name}: ${res.error}`);
       return;
     } else if (res.chapter) {
-      // Find the output channel based on the channel Id in config
-      const channel = client.channels.cache.get(config.opus.discord.toChannel);
+      // Get the Discord output channel for the current manga
+      const channel = client.channels.cache.get(manga.toChannel);
+      const notifyPrefix = manga.notifyRole ? `<@&${manga.notifyRole}> ` : "";
 
       // Send a message with the chapter link in the output channel
       await channel.send(
-        `<@&${config.opus.discord.notifyRole}> ${manga} chapter **${res.chapter}** is out!\n${res.url}`
+        `${notifyPrefix}${manga.name} chapter **${res.chapter}** is out!\n${res.url}`
       );
 
-      console.log(`Successfully fetched ${manga} chapter ${res.chapter}`);
+      console.log(`Successfully fetched ${manga.name} chapter ${res.chapter}`);
 
       // Automatically create a thread to talk about the chapter if configured
-      if (config.opus.discord.autoCreateThread) {
+      if (manga.autoCreateThread) {
         const threadName = `chap-${res.chapter}-talk`;
 
         // Create thread if not exist
@@ -73,7 +78,7 @@ client.on("messageCreate", async (message) => {
 
       // Update data file with latest chapter number
       if (!data.mangas) data.mangas = [];
-      const stored = data.mangas.find((m) => m.name === manga);
+      const stored = data.mangas.find((m) => m.name === manga.name);
 
       if (stored) {
         // If the stored chapter is not the latest
@@ -81,7 +86,9 @@ client.on("messageCreate", async (message) => {
           const missed = res.chapter - stored.chapter - 1;
           if (missed > 0) {
             console.log(
-              `I missed ${missed} ${manga} chapter${missed > 1 ? "s" : ""}!`
+              `I missed ${missed} ${manga.name} chapter${
+                missed > 1 ? "s" : ""
+              }!`
             );
           }
 
@@ -91,7 +98,7 @@ client.on("messageCreate", async (message) => {
         }
       } else {
         data.mangas.push({
-          name: manga,
+          name: manga.name,
           chapter: res.chapter,
           url: res.url,
         });
@@ -111,10 +118,11 @@ client.login(config.token);
  * @access      private
  *
  * @param {string} msg The discord message from TCB
+ * @param {string} manga The manga object
  *
  * @return {string} A formatted message containing the chapter link.
  */
-function formatTCBMessage(msg) {
+function formatTCBMessage(msg, manga) {
   const urlStart = msg.indexOf("http");
 
   if (urlStart === -1)
@@ -123,5 +131,21 @@ function formatTCBMessage(msg) {
   const url = msg.slice(urlStart);
   const chapNum = url.slice(url.lastIndexOf("-") + 1);
 
-  return `<@&${config.opus.discord.notifyRole}> One Piece chapter **${chapNum}** is out!\n${url}`;
+  return `<@&${manga.notifyRole}> ${manga.name} chapter **${chapNum}** is out!\n${url}`;
+}
+
+/**
+ * Fetch important elements from the TCB message and create a new message.
+ *
+ * @since       1.0.0
+ * @access      private
+ *
+ * @param {string} channelId The ID of the discord channel where TCB updates are sent
+ *
+ * @return {bool} True if the channel is a TCB update channel, false otherwise.
+ */
+function isListenChannel(channelId) {
+  if (mangas.find((m) => m.fromChannel === channelId)) return true;
+
+  return false;
 }

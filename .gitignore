@@ -89,5 +89,6 @@ lerna-debug.log
 .DS_Store
 Thumbs.db
 
-# Ignore config file
+# Ignore config file and data
 config.json
+data.json
