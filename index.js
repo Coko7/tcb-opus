@@ -13,6 +13,12 @@ const config = require("./config.json");
 const opus = require("./opus-config.json");
 const data = require("./data.json");
 
+// Fetch modes determine how the direct link to the chapter will be obtained
+const FetchModes = {
+  FROM_MSG: 1,
+  FROM_SITE: 2,
+};
+
 // Load the manga interests and fix their case to be title case
 const mangas = opus.mangas.map((m) => {
   m.name = utils.toTitleCase(m.name);
@@ -41,8 +47,7 @@ client.on("messageCreate", async (message) => {
   });
 
   if (manga && manga.active) {
-    // Fetch the latest chapter from TCBScans website
-    const res = await scraper.fetchLatestChapter(manga.name, opus.scanSite);
+    const res = await getChapter(message.content, manga.name);
 
     if (res.error) {
       console.error(`Error occured while fetching ${manga.name}: ${res.error}`);
@@ -137,6 +142,54 @@ function formatTCBMessage(msg, manga) {
   const chapNum = url.slice(url.lastIndexOf("-") + 1);
 
   return `<@&${manga.notifyRole}> ${manga.name} chapter **${chapNum}** is out!\n${url}`;
+}
+
+/**
+ * Gets chapter data from either message or website depending on fetch mode.
+ *
+ * @since       1.3.0
+ * @access      private
+ *
+ * @param {string} msg The discord message from TCB
+ * @param {string} manga The manga name in Title Case.
+ *
+ * @return {object} An object with the chapter number and direct URL. An object with error field if the operation did not succeed.
+ */
+async function getChapter(msg, manga) {
+  switch (opus.fetchMode) {
+    case FetchModes.FROM_MSG:
+      // Fetch chapter link from TCB message
+      return fetchChapterFromMessage(msg);
+    case FetchModes.FROM_SITE:
+      // Fetch the latest chapter from TCBScans website
+      return await scraper.fetchLatestChapter(manga, opus.scanSite);
+    default:
+      return { error: "UNKNOWN_FETCH_MODE" };
+  }
+}
+
+/**
+ * Gets chapter number and URL from the TCB message itself.
+ *
+ * @since       1.3.0
+ * @access      private
+ *
+ * @param {string} msg The discord message from TCB
+ *
+ * @return {object} An object with the chapter number and direct URL. An object with error field if the operation did not succeed.
+ */
+function fetchChapterFromMessage(msg) {
+  const urlStart = msg.indexOf("http");
+
+  if (urlStart === -1) return { error: "NOT_FOUND" };
+
+  const url = msg.slice(urlStart);
+  const chapNum = url.slice(url.lastIndexOf("-") + 1);
+
+  return {
+    chapter: chapNum,
+    url: url,
+  };
 }
 
 /**

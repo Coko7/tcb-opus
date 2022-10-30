@@ -44,6 +44,7 @@ To do that, open the file [opus-config.json](./opus-config.json). It should have
 ```json
 {
   "scanSite": "https://onepiecechapters.com/",
+  "fetchMode": 1,
   "mangas": [
     {
       "name": "One Piece",
@@ -74,7 +75,11 @@ To do that, open the file [opus-config.json](./opus-config.json). It should have
 }
 ```
 
-You do not need to change `scanSite` as only TCB can be used right now.
+You do not need to change `scanSite` as only TCB can be used right now. `fetchMode` will control how chapter data is fetched. Two modes are available:
+
+- **1:** The chapter number and direct URL will be fetched from TCB's Discord message
+- **2:** It is possible that TCB decides to stop posting direct links to the chapter for security reasons. In that case, you can setup `tcb-opus` to scrape the website and find the direct link and chapter number itself
+
 The default configuration registers listen events for two mangas: **One Piece** and **Black Clover**.
 You can register as many mangas as you want as long as the scans exist on the TCB website.
 
