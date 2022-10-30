@@ -31,9 +31,14 @@ client.on("messageCreate", async (message) => {
   if (!isListenChannel(message.channel.id)) return;
 
   // Check whether the message contains one of the desired mangas
-  const manga = mangas.find((m) =>
-    message.content.toLowerCase().includes(m.name.toLowerCase())
-  );
+  // Use regular expression instead of name if 'regexName' is defined
+  const manga = mangas.find((m) => {
+    if (m.regex) {
+      const re = new RegExp(m.regex, "i");
+      return message.content.match(re);
+    }
+    return message.content.toLowerCase().includes(m.name.toLowerCase());
+  });
 
   if (manga && manga.active) {
     // Fetch the latest chapter from TCBScans website

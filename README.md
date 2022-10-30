@@ -23,14 +23,17 @@ npm i
 ## Configuration
 
 ### Bot token and prefix
+
 First, you need to create a Discord application and bot on Discord [Developer Portal](https://discord.com/developers/applications).
 Then, create a file named `config.json` with the following content:
+
 ```json
 {
   "token": "YOUR_BOT_TOKEN",
-  "prefix": "!",
+  "prefix": "!"
 }
 ```
+
 Replace `YOUR_BOT_TOKEN` with the token of your bot.
 
 ### OPUS setup
@@ -57,22 +60,33 @@ To do that, open the file [opus-config.json](./opus-config.json). It should have
       "fromChannel": "TCB_LISTEN_CHANNEL_ID",
       "toChannel": "OPUS_NOTIFY_CHANNEL_ID",
       "autoCreateThread": true
+    },
+    {
+      "name": "Hunter X Hunter",
+      "regex": "H(unter)?(.?)X(.?)H(unter)?",
+      "active": true,
+      "notifyRole": "DISCORD_ROLE_ID",
+      "fromChannel": "TCB_LISTEN_CHANNEL_ID",
+      "toChannel": "OPUS_NOTIFY_CHANNEL_ID",
+      "autoCreateThread": true
     }
   ]
 }
 ```
 
-You do not need to change `scanSite` as only TCB can be used right now. 
+You do not need to change `scanSite` as only TCB can be used right now.
 The default configuration registers listen events for two mangas: **One Piece** and **Black Clover**.
 You can register as many mangas as you want as long as the scans exist on the TCB website.
 
 Manga attributes:
+
 - The `name` attribute of a manga is the most important as it is used to identify a manga on TCB. Make sure to get it right.
+- The `regex` attribute is optional and may be used when TCB uses other denominations for the manga in their Discord messages.
 - The `active` attribute can be used to disable notification for a specific manga without removing its configuration.
-- The `notifyRole` attribute will be used in the notification message to notify a specific Discord role. The value must be a valid Discord role ID on your Discord server. *This attribute is optional. If omitted, the notification message will not ping any role.*
+- The `notifyRole` attribute will be used in the notification message to notify a specific Discord role. The value must be a valid Discord role ID on your Discord server. _This attribute is optional. If omitted, the notification message will not ping any role._
 - The `fromChannel` attribute is the Discord channel ID in which you receive TCB releases notifications.
 - The `toChannel` attribute is the Discord channel ID of the channel where you want OPUS notifications to be sent.
-- The `autoCreateThread` attribute is used to automatically create a thread to talk about a new chapter release. The thread will be attached to the `toChannel` channel. *This attribute is optional. If omitted, no thread will be created.*
+- The `autoCreateThread` attribute is used to automatically create a thread to talk about a new chapter release. The thread will be attached to the `toChannel` channel. _This attribute is optional. If omitted, no thread will be created._
 
 ## Launching the bot
 
