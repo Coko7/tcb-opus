@@ -1,6 +1,6 @@
 {
   "name": "tcb-opus",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A discord bot to get the latest manga chapters from TCBScans as soon as they come out.",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/Coko7/tcb-opus#readme",
   "dependencies": {
     "axios": "^0.25.0",
-    "discord.js": "^13.6.0"
+    "discord.js": "^13.6.0",
+    "winston": "^3.8.2"
   }
 }

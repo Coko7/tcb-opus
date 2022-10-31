@@ -1,5 +1,5 @@
 // Import Node dependencies
-const fs = require("fs");
+const fs = require('fs');
 
 /**
  * Convert any string to Title Case.
@@ -17,13 +17,13 @@ const fs = require("fs");
  * @return {string} A string in Title Case format.
  */
 function toTitleCase(str) {
-  let niu = "";
+  let niu = '';
 
   // Remove excess spaces, convert to lowercase and split words
-  let words = str.replace(/\s+/g, " ").trim().toLowerCase().split(" ");
+  let words = str.replace(/\s+/g, ' ').trim().toLowerCase().split(' ');
   words.forEach((word) => {
     // Convert first letter to uppercase
-    niu += word.charAt(0).toUpperCase() + word.slice(1) + " ";
+    niu += word.charAt(0).toUpperCase() + word.slice(1) + ' ';
   });
 
   // Remove the space at the end
@@ -44,11 +44,9 @@ function writeJSONToFile(obj, path) {
   const data = JSON.stringify(obj);
 
   // Attempt to write file to disk
-  fs.writeFile(path, data, "utf8", (err) => {
+  fs.writeFile(path, data, 'utf8', (err) => {
     if (err) {
-      console.error(`Error writing data to ${path}: ${err}`);
-    } else {
-      console.info(`Successfully wrote data to ${path}!`);
+      throw err;
     }
   });
 }
