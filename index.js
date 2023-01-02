@@ -194,15 +194,18 @@ async function getChapter(msg, manga) {
  * @return {object} An object with the chapter number and direct URL. An object with error field if the operation did not succeed.
  */
 function fetchChapterFromMessage(msg) {
-  const urlStart = msg.indexOf('http');
+  const delim = /[\s\n]+/;
+  const parts = msg.split(delim);
 
-  if (urlStart === -1) return { error: 'NOT_FOUND' };
+  const url = parts.find((p) => p.indexOf('http') >= 0);
+  if (!url) return { error: 'NOT_FOUND' };
 
-  const url = msg.slice(urlStart);
   const chapNum = url.slice(url.lastIndexOf('-') + 1);
 
+  if (isNaN(chapNum)) return { error: 'INV_CHAP_NUM' };
+
   return {
-    chapter: chapNum,
+    chapter: parseInt(chapNum),
     url: url,
   };
 }
