@@ -39,14 +39,7 @@ client.on('messageCreate', async (message) => {
   if (!isListenChannel(message.channel.id)) return;
 
   // Check whether the message contains one of the desired mangas
-  // Use regular expression instead of name if 'regexName' is defined
-  const manga = mangas.find((m) => {
-    if (m.regex) {
-      const re = new RegExp(m.regex, 'i');
-      return message.content.match(re);
-    }
-    return message.content.toLowerCase().includes(m.name.toLowerCase());
-  });
+  const manga = getMangaTitleFromMessage(message.content);
 
   if (manga && manga.active) {
     logger.info(
@@ -183,6 +176,24 @@ async function getChapter(msg, manga) {
   }
 }
 
+function getMangaTitleFromMessage(msg) {
+  // Remove URL from message (TCB's hostname contains 'onepiece')
+  const pattern =
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/gm;
+  const msgNoURL = msg.replace(pattern, '');
+
+  const manga = mangas.find((m) => {
+    // Use regular expression instead of name if 'regexName' is defined
+    if (m.regex) {
+      const re = new RegExp(m.regex, 'i');
+      return msgNoURL.match(re);
+    }
+    return utils.simplifyString(msgNoURL).includes(utils.simplifyString(m.name));
+  });
+
+  return manga;
+}
+
 /**
  * Gets chapter number and URL from the TCB message itself.
  *
@@ -200,12 +211,15 @@ function fetchChapterFromMessage(msg) {
   const url = parts.find((p) => p.indexOf('http') >= 0);
   if (!url) return { error: 'NOT_FOUND' };
 
-  const chapNum = url.slice(url.lastIndexOf('-') + 1);
+  const regex = /chapter-(\d+)/;
+  const match = url.match(regex);
 
-  if (isNaN(chapNum)) return { error: 'INV_CHAP_NUM' };
+  if (!match || match.length !== 2) return { error: 'INV_CHAP_NUM' };
+
+  const chapNum = parseInt(match[1]);
 
   return {
-    chapter: parseInt(chapNum),
+    chapter: chapNum,
     url: url,
   };
 }

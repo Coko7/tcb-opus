@@ -51,4 +51,16 @@ function writeJSONToFile(obj, path) {
   });
 }
 
-module.exports = { toTitleCase, writeJSONToFile };
+/**
+ * Simplify a string for easier comparison
+ *
+ * @since       1.5.2
+ * @access      public
+ *
+ * @param {string} str The str to simplify.
+ */
+function simplifyString(str) {
+  return str.toLowerCase().replace(/[\s\n]+/, '');
+}
+
+module.exports = { toTitleCase, writeJSONToFile, simplifyString };
