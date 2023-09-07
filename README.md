@@ -43,8 +43,8 @@ To do that, open the file [opus-config.json](./opus-config.json). It should have
 
 ```json
 {
-  "scanSite": "https://onepiecechapters.com/",
-  "fetchMode": 1,
+  "scanSite": "https://tcbscans.com/",
+  "fetchMode": 2,
   "mangas": [
     {
       "name": "One Piece",
