@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // Import local dependencies
-const logger = require('./logger');
+const { logger } = require('./logger');
 
 /**
  * Fetch the latest manga chapter from TCBScans asynchronously.

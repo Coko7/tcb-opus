@@ -1,8 +1,10 @@
 {
-  "scanSite": "https://onepiecechapters.com/",
+  "scanSite": "https://tcbscans.com/",
+  "fetchMode": 2,
   "mangas": [
     {
       "name": "One Piece",
+      "regex": "One(.?)Piece",
       "active": true,
       "notifyRole": "DISCORD_ROLE_ID",
       "fromChannel": "TCB_LISTEN_CHANNEL_ID",
@@ -11,6 +13,7 @@
     },
     {
       "name": "Black Clover",
+      "regex": "Black(.?)Clover",
       "active": true,
       "notifyRole": "DISCORD_ROLE_ID",
       "fromChannel": "TCB_LISTEN_CHANNEL_ID",
