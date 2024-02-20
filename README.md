@@ -1,6 +1,4 @@
-# tcb-opus
-
-## What is it?
+# 🤖 tcb-opus
 
 `tcb-opus` is a Discord bot you can use to get the latest manga chapters from **TCBScans** as soon as they come out!
 
@@ -8,19 +6,12 @@ To work properly, you first need to configure one of the channels in your Discor
 
 Once a message is forwarded to your Discord channel, `tcb-opus` will analyse it and determine to what manga it corresponds. Once a valid manga has been recognized, `tcb-opus` will attempt to fetch the URL of the latest chapter for that manga from TCBScans. It will then send a message containing the chapter URL to whatever channel you like on your Discord server.
 
-## Prequisites
+## 🧰 Requirements
 
 Please make sure you have both [npm](https://www.npmjs.com/) and [Node.js](https://nodejs.org/) **v16.6+** installed otherwise this bot will not work.
+Once you have cloned the repository, simply run `npm i` to install the required dependencies on your system.
 
-## Installation
-
-Simply run the following command to install to install the required dependencies on your system:
-
-```sh
-npm i
-```
-
-## Configuration
+## ⚙️ Setup
 
 ### Bot token and prefix
 
@@ -36,7 +27,7 @@ Then, create a file named `config.json` with the following content:
 
 Replace `YOUR_BOT_TOKEN` with the token of your bot.
 
-### OPUS setup
+### OPUS configuration
 
 Now that `config.json` has been created, you need to configure the bot to listen for specific manga releases and notify users.
 To do that, open the file [opus-config.json](./opus-config.json). It should have the following content by default:
@@ -93,7 +84,7 @@ Manga attributes:
 - The `toChannel` attribute is the Discord channel ID of the channel where you want OPUS notifications to be sent.
 - The `autoCreateThread` attribute is used to automatically create a thread to talk about a new chapter release. The thread will be attached to the `toChannel` channel. _This attribute is optional. If omitted, no thread will be created._
 
-## Launching the bot
+## 🚀 Launching the bot
 
 Once, you have installed the required packages and configured [config.json](config.json), you can launch the bot simply by typing:
 
